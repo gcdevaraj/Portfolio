@@ -65,29 +65,25 @@ pipeline {
         }
 
         stage('Update Kubernetes Manifest') {
-            steps {
+    steps {
+        dir('manifest') {
+            git branch: 'main',
+                credentialsId: 'github-creds',
+                url: 'https://github.com/gcdevaraj/Portfolio.git'
 
-                dir('manifest') {
+            sh """
+            sed -i 's|image:.*|image: gcdevaraj/portfolio:${BUILD_NUMBER}|' kubernetes/deployment.yaml
 
-                    git branch: "${MANIFEST_BRANCH}",
-                        credentialsId: 'github-creds',
-                        url: "${MANIFEST_REPO}"
-                    sh """
-                    sed -i 's|image:.*|image: ${DOCKER_IMAGE}:${BUILD_TAG}|' deployment.yaml
+            git config user.email "jenkins@local"
+            git config user.name "Jenkins"
 
-                    git config user.email "jenkins@local"
-
-                    git config user.name "Jenkins"
-
-                    git add deployment.yaml
-
-                    git commit -m "Updated image to ${BUILD_TAG}" || true
-
-                    git push origin ${MANIFEST_BRANCH}
-                    """
-                }
-            }
+            git add kubernetes/deployment.yaml
+            git commit -m "Update image to ${BUILD_NUMBER}" || true
+            git push origin main
+            """
         }
+    }
+}
     }
 
     post {
