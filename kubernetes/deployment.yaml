@@ -20,7 +20,7 @@ spec:
       containers:
       - name: portfolio
 
-        image: gcdevaraj/portfolio:21
+        image: gcdevaraj/portfolio:22
 
         ports:
         - containerPort: 80
