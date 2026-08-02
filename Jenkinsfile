@@ -71,16 +71,25 @@ pipeline {
                 credentialsId: 'github-creds',
                 url: 'https://github.com/gcdevaraj/Portfolio.git'
 
-            sh """
-            sed -i 's|image:.*|image: gcdevaraj/portfolio:${BUILD_NUMBER}|' kubernetes/deployment.yaml
+            withCredentials([usernamePassword(
+                credentialsId: 'github-creds',
+                usernameVariable: 'GIT_USERNAME',
+                passwordVariable: 'GIT_TOKEN'
+            )]) {
+                sh '''
+                sed -i "s|image:.*|image: gcdevaraj/portfolio:${BUILD_NUMBER}|" kubernetes/deployment.yaml
 
-            git config user.email "jenkins@local"
-            git config user.name "Jenkins"
+                git config user.email "jenkins@local"
+                git config user.name "Jenkins"
 
-            git add kubernetes/deployment.yaml
-            git commit -m "Update image to ${BUILD_NUMBER}" || true
-            git push origin main
-            """
+                git add kubernetes/deployment.yaml
+                git commit -m "Update image to ${BUILD_NUMBER}" || true
+
+                git remote set-url origin https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/gcdevaraj/Portfolio.git
+
+                git push origin main
+                '''
+            }
         }
     }
 }
