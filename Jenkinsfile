@@ -70,8 +70,8 @@ pipeline {
                 dir('manifest') {
 
                     git branch: "${MANIFEST_BRANCH}",
+                        credentialsId: 'github-creds',
                         url: "${MANIFEST_REPO}"
-
                     sh """
                     sed -i 's|image:.*|image: ${DOCKER_IMAGE}:${BUILD_TAG}|' deployment.yaml
 
